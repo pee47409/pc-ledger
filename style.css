@@ -54,3 +54,15 @@ button:disabled { opacity: .6; cursor: wait; }
 #account-label { overflow-wrap: anywhere; color: var(--muted); font-size: 14px; }
 #sync-label { color: #375d7d; font-size: 14px; min-height: 22px; }
 @media (max-width: 640px) { .account-bar .actions { width: auto; } .intro .actions { gap: 6px; } }
+
+
+fieldset { border:1px solid var(--border); border-radius:10px; padding:12px; display:grid; gap:12px; min-width:0; }
+#entry-gallery { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+#entry-gallery img { width:100%; height:90px; object-fit:cover; border-radius:8px; }
+#entry-gallery a { color:#245a83; font-size:14px; }
+#entry-gallery button { font-size:12px; padding:4px; }
+#notes-dialog { width:min(720px,calc(100% - 24px)); }
+#notes-text { width:100%; margin:12px 0; }
+.note-candidate { border:1px solid var(--border); border-radius:10px; padding:12px; margin:12px 0; display:grid; gap:10px; }
+.note-candidate small { color:#756022; overflow-wrap:anywhere; }
+#notes-message,#evidence-status { font-size:14px; color:#375d7d; }

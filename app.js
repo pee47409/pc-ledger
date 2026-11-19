@@ -103,6 +103,10 @@ function openEntry(row) {
   $('#entry-title').textContent = row ? 'แก้ไขรายการ' : 'เพิ่มรายการ';
   $('#part-select').innerHTML = '<option value="">ไม่ระบุ</option>' + state.parts.map(part => '<option value="'+clean(part.id)+'">'+clean(part.name)+'</option>').join('');
   fill(entry,row);
+  entry.elements.attachments.value = JSON.stringify(row?.attachments || []);
+  document.querySelector('#entry-files').value = '';
+  document.querySelector('#evidence-status').textContent = '';
+  void showEvidence();
   entry.querySelector('.delete').hidden = !row;
   typeFields();
   $('#editor').showModal();
@@ -132,7 +136,7 @@ entry.onsubmit = async event => {
   const fields = formRecord(entry);
   if (!fields.name) { status('กรอกชื่อรายการ'); return; }
   if (fields.time && !fields.date) { status('กรอกวันที่ด้วยเมื่อระบุเวลา'); return; }
-  const row = {...fields,id:entryId || crypto.randomUUID(),amount:Number(fields.amount),fee:Number(fields.fee),reference:fields.type === 'swap' ? Number(fields.reference) : 0};
+  const row = {...state.rows.find(item => item.id === entryId),...fields,attachments:JSON.parse(fields.attachments || '[]'),id:entryId || crypto.randomUUID(),amount:Number(fields.amount),fee:Number(fields.fee),reference:fields.type === 'swap' ? Number(fields.reference) : 0};
   if (await save({...state,rows:upsert(state.rows,row,entryId)},'บันทึกรายการแล้ว')) {
     $('#editor').close();
     setTab('ledger');
@@ -176,4 +180,5 @@ $('#backup').onchange = async event => {
   } catch { status('อ่านไฟล์สำรองไม่ได้ กรุณาเลือกไฟล์ JSON ที่ส่งออกจาก PC Ledger'); }
 };
 render();
+
 
