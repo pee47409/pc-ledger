@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#edf5fc"><meta name="description" content="สมุดซื้อขายและสเปกคอมส่วนตัว"><title>PC Ledger · สมุดคอม</title><link rel="stylesheet" href="style.css"><script defer src="supabase.js"></script><script defer src="app.js"></script><script defer src="cloud.js"></script></head>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#edf5fc"><meta name="description" content="สมุดซื้อขายและสเปกคอมส่วนตัว"><title>PC Ledger · สมุดคอม</title><link rel="stylesheet" href="style.css?v=20261119-2"><script defer src="supabase.js?v=20261119-2"></script><script defer src="app.js?v=20261119-2"></script><script defer src="cloud.js?v=20261119-2"></script></head>
 <body>
-<section id="auth-panel" class="auth-shell">
+<div id="session-loading" role="status" style="min-height:100svh;display:grid;place-items:center;padding:24px;color:#375d7d;font-size:16px">กำลังเปิดบัญชี…</div>
+<section id="auth-panel" class="auth-shell" hidden>
   <div class="auth-card">
     <div class="brand"><span class="logo" aria-hidden="true">▤</span> PC Ledger</div>
-    <h1>พื้นที่ส่วนตัว<br><span>ของคอมคุณ</span></h1>
+    <h1>เข้าสู่ระบบ</h1>
     <p>เข้าสู่ระบบเพื่อดูสเปกและบันทึกซื้อขาย</p>
     <form id="login-form">
       <label>อีเมล<input id="login-email" type="email" autocomplete="username" required placeholder="you@example.com"></label>

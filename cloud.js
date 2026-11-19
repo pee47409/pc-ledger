@@ -20,6 +20,7 @@ function lockLedger(message = '') {
   state = blankLedger();
   render();
   document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+  $('#session-loading').hidden = true;
   $('#workspace').hidden = true;
   $('#auth-panel').hidden = false;
   $('#auth-message').textContent = message;
@@ -66,6 +67,8 @@ async function openCloud(session) {
   const generation = ++authGeneration;
   lockLedger('กำลังตรวจสอบสิทธิ์…');
   if (!session) { $('#auth-message').textContent = ''; return; }
+  $('#auth-panel').hidden = true;
+  $('#session-loading').hidden = false;
   try {
     const {data,error} = await cloud.from('pc_ledger_owners').select('user_id').eq('user_id',session.user.id).maybeSingle();
     if (generation !== authGeneration) return;
@@ -76,6 +79,7 @@ async function openCloud(session) {
     }
     cloudUser = session.user;
     $('#account-label').textContent = session.user.email;
+    $('#session-loading').hidden = true;
     $('#auth-panel').hidden = true;
     $('#workspace').hidden = false;
     await loadCloud();
@@ -85,11 +89,35 @@ async function openCloud(session) {
 }
 
 async function saveCloud(next, message) {
-  if (!ready || !cloudUser) { status(cloudError || 'กรุณาโหลดข้อมูลให้สำเร็จก่อนบันทึก'); return false; }
-  if (saving || loading) { status('กำลังเชื่อมต่อ กรุณารอสักครู่'); return false; }
+  if (saving) { status('กำลังบันทึกรายการก่อนหน้า กรุณารอให้เสร็จ'); return false; }
   if (!validate(next)) { status('ข้อมูลรายการไม่ถูกต้อง'); return false; }
-  saving = true;
   const generation = authGeneration;
+  const expectedRevision = revision;
+  saving = true;
+  try {
+    const deadline = Date.now() + 20000;
+    while (loading && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    if (generation !== authGeneration) { saving = false; return false; }
+    if (loading || !ready || !cloudUser) {
+      saving = false;
+      const message = cloudError || 'ยังโหลดข้อมูลไม่เสร็จ กดโหลดล่าสุดแล้วนำเข้าไฟล์อีกครั้ง';
+      $('#sync-label').textContent = message;
+      status(message);
+      return false;
+    }
+    if (revision !== expectedRevision) {
+      saving = false;
+      const message = 'ข้อมูลล่าสุดเปลี่ยนแล้ว กรุณาตรวจยอดแล้วนำเข้าไฟล์อีกครั้ง';
+      $('#sync-label').textContent = message;
+      status(message);
+      return false;
+    }
+  } catch (error) {
+    saving = false;
+    throw error;
+  }
   $('#sync-label').textContent = 'กำลังบันทึก…';
   try {
     const {data,error} = await cloud.rpc('save_pc_ledger',{p_expected_revision:revision,p_data:next});
@@ -135,8 +163,11 @@ $('#login-form').onsubmit = async event => {
       return;
     }
     await openCloud(data.session);
-  } catch {
-    $('#auth-message').textContent = 'เชื่อมต่อไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง';
+  } catch (error) {
+    console.error('PC Ledger sign-in failed', error);
+    $('#auth-message').textContent = error instanceof TypeError
+      ? 'โหลดหรือเชื่อมต่อไม่สำเร็จ ลองรีเฟรชหน้าเว็บ หากยังพบปัญหาให้ตรวจ Console'
+      : 'ระบบหน้าเว็บเกิดข้อผิดพลาด (' + error.name + ') กรุณารีเฟรชเพื่อโหลดไฟล์ล่าสุด';
   } finally {
     $('#login-password').value = '';
     button.disabled = false;
