@@ -1,2 +1,0 @@
-const specs = [];
-const seed = [];
